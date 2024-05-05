@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from patient.models import Patient
 
 class Specialization(models.Model):
     name = models.CharField(max_length= 40)
@@ -26,11 +27,33 @@ class AvailableTime(models.Model):
 class Doctor(models.Model):
     user = models.OneToOneField(User, on_delete= models.CASCADE)
     image = models.ImageField(upload_to= 'doctor/images/')
-    designation = models.ManyToManyField(Designation)
+    designation = models.ForeignKey(Designation, on_delete= models.CASCADE)
     specialization = models.ManyToManyField(Specialization)
-    available_time = models.ForeignKey(AvailableTime, on_delete= models.CASCADE)
+    available_time = models.ManyToManyField(AvailableTime)
     fee = models.IntegerField()
     meet_link = models.CharField(max_length= 100)
 
+
     def __str__(self):
-        return f'Dr. {self.user.first_name} {self.user.last_name}'
+        return f'{self.user.first_name} {self.user.last_name}'
+
+
+class Review(models.Model):
+    STAR_RATING = (
+        ('⭐', '⭐'),
+        ('⭐⭐', '⭐⭐'),
+        ('⭐⭐⭐', '⭐⭐⭐'),
+        ('⭐⭐⭐⭐', '⭐⭐⭐⭐'),
+        ('⭐⭐⭐⭐⭐', '⭐⭐⭐⭐⭐')
+    )
+    patient = models.ForeignKey(Patient, on_delete= models.CASCADE)
+    doctor = models.ForeignKey(Doctor, on_delete= models.CASCADE)
+    body = models.TextField()
+    rating = models.CharField(choices= STAR_RATING, max_length= 7)
+    create_at = models.DateTimeField(auto_now_add= True)
+
+    class Meta:
+        unique_together = ('patient', 'doctor')
+
+    def __str__(self):
+        return f'Doctor: {self.doctor.user.first_name} review by {self.patient.user.first_name}'
