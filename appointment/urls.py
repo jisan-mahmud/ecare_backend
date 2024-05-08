@@ -3,8 +3,7 @@ from . import views
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
-router.register('', views.ServiceViewset)
-
+router.register(r'', views.AppointmentViewset)
 
 urlpatterns = [
     path('', include(router.urls)),
