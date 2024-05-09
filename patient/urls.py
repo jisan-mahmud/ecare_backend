@@ -6,5 +6,7 @@ router = DefaultRouter()
 router.register(r'list', views.PatientViewset, basename= 'patent_list')
 
 urlpatterns = [
-    path('', include(router.urls))
+    path('', include(router.urls)),
+    path('register/', views.PatientRegisterAPIView.as_view(), name='register'),
+    path('activate/<uid>/<token>/', views.active, name='activate')
 ]
