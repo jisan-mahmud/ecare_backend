@@ -2,10 +2,18 @@ from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Patient
-from .serializers import PatientSerializer, PatientRegister
+from .serializers import (
+    PatientSerializer,
+    PatientRegister,
+    UserLoginSerializer
+    )
 from django.contrib.auth.models import User
 from django.shortcuts import redirect
 from rest_framework.decorators import api_view
+from rest_framework.authtoken.models import Token
+from rest_framework import status
+from django.contrib.auth import authenticate
+from rest_framework.permissions import IsAuthenticated
 
 # header file for email confirmation
 from django.contrib.sites.shortcuts import get_current_site
@@ -50,6 +58,45 @@ def active(request, uid, token):
     if default_token_generator.check_token(user, token):
         user.is_active = True
         user.save()
-        return Response({'email': 'Email succesfully activated.'})
+        token, create = Token.objects.get_or_create(user= user)
+        response = {
+            'success': True,
+            'username': user.username,
+            'email': user.email,
+            'token': token.key
+        }
+        return Response(response, status= status.HTTP_200_OK)
     else:
-        return redirect({'error': 'Try again. Email not activate!'})
+        return redirect({'error': 'Try again. Email not activate!'}, status = status.HTTP_404_NOT_FOUND)
+
+
+class UserLoginAPIView(APIView):
+    serializer_class = UserLoginSerializer
+    def post(self, request):
+        serializer = self.serializer_class(data= request.data)
+        if serializer.is_valid():
+            username = serializer.data['username']
+            password = serializer.data['password']
+            user = authenticate(username= username, password= password)
+            if user:
+                token, create = Token.objects.get_or_create(user= user)
+                response = {
+                    'success': True,
+                    'id': user.id,
+                    'username': user.username,
+                    'token': token.key
+                }
+                return Response(response, status= status.HTTP_200_OK)
+            else:
+                response = {
+                    'success': False,
+                    'massage': 'user credentials invalid.'
+                }
+                return Response(response, status= status.HTTP_401_UNAUTHORIZED)
+        return Response({'error': serializer.errors}, status= status.HTTP_400_BAD_REQUEST)
+
+class UserInfo(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        print(request.user)
+        return Response('hello')

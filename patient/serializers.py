@@ -39,3 +39,7 @@ class PatientRegister(serializers.ModelSerializer):
         user.is_active = False
         user.save()
         return user
+
+class UserLoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField()
