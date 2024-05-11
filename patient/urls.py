@@ -10,5 +10,5 @@ urlpatterns = [
     path('register/', views.PatientRegisterAPIView.as_view(), name='register'),
     path('activate/<uid>/<token>/', views.active, name='activate'),
     path('login/', views.UserLoginAPIView.as_view(), name= 'user_login'),
-    path('profile/', views.UserInfo.as_view())
+    path('logout/', views.LogoutAPIView.as_view(), name= 'user_logout')
 ]

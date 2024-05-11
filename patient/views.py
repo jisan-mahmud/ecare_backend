@@ -9,11 +9,13 @@ from .serializers import (
     )
 from django.contrib.auth.models import User
 from django.shortcuts import redirect
+from django.urls import reverse
 from rest_framework.decorators import api_view
 from rest_framework.authtoken.models import Token
 from rest_framework import status
 from django.contrib.auth import authenticate
 from rest_framework.permissions import IsAuthenticated
+from django.utils import timezone
 
 # header file for email confirmation
 from django.contrib.sites.shortcuts import get_current_site
@@ -67,7 +69,7 @@ def active(request, uid, token):
         }
         return Response(response, status= status.HTTP_200_OK)
     else:
-        return redirect({'error': 'Try again. Email not activate!'}, status = status.HTTP_404_NOT_FOUND)
+        return Response({'error': 'Try again. Email not activate!'}, status = status.HTTP_404_NOT_FOUND)
 
 
 class UserLoginAPIView(APIView):
@@ -78,8 +80,14 @@ class UserLoginAPIView(APIView):
             username = serializer.data['username']
             password = serializer.data['password']
             user = authenticate(username= username, password= password)
-            if user:
+            if user and (user.is_active == True):
                 token, create = Token.objects.get_or_create(user= user)
+
+                #update last login time
+                time = timezone.now()
+                user.last_login = time
+                user.save(update_fields= ['last_login'])
+
                 response = {
                     'success': True,
                     'id': user.id,
@@ -95,8 +103,23 @@ class UserLoginAPIView(APIView):
                 return Response(response, status= status.HTTP_401_UNAUTHORIZED)
         return Response({'error': serializer.errors}, status= status.HTTP_400_BAD_REQUEST)
 
-class UserInfo(APIView):
+
+class LogoutAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    def get(self, request):
-        print(request.user)
-        return Response('hello')
+
+    def post(self, request):
+        # Retrieve the user's token
+        user_token = Token.objects.filter(user=request.user)
+
+        # Delete the user's token
+        user_token.delete()
+
+        # Create the response
+        response_data = {
+            'success': True,
+            'id': request.user.id,
+            'message': 'User successfully logged out.'
+        }
+
+        # Return the response
+        return Response(response_data, status=status.HTTP_200_OK)
