@@ -8,13 +8,16 @@ from .models import (
 )
 
 class DoctorSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField(many= False)
     specialization = serializers.StringRelatedField(many= True)
     designation = serializers.StringRelatedField(many= False)
     available_time = serializers.StringRelatedField(many= True)
+    full_name = serializers.SerializerMethodField()
     class Meta:
         model = Doctor
-        fields = '__all__'
+        fields = ['id', 'full_name', 'image', 'designation', 'specialization', 'available_time', 'fee', 'meet_link']
+
+    def get_full_name(self, obj):
+        return f'{obj.user.first_name} {obj.user.last_name}'
 
 class DesignationSerializer(serializers.ModelSerializer):
     class Meta:
