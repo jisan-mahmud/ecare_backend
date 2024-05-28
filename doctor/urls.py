@@ -12,7 +12,7 @@ router = DefaultRouter()
 router.register(r'list', DoctorViewset)
 router.register(r'designation', DesignationViewset)
 router.register(r'specialization', SpecializationViewset)
-router.register(r'available-time', AvailableTimeViewset)
+router.register(r'availabletime', AvailableTimeViewset)
 router.register(r'review', ReviewViewset)
 
 urlpatterns = [

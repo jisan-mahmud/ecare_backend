@@ -20,6 +20,26 @@ class PatientRegister(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username', 'first_name', 'last_name', 'email', 'password', 'confirm_password']
+        extra_kwargs = {
+            'username' : {'required': True},
+            'first_name': {'required': True},
+            'last_name': {'required': True},
+            'email': {'required': True},
+            'password': {'required': True},
+            'confirm_password': {'required': True},
+        }
+
+
+    def validate(self, attrs):
+        if attrs['password'] != attrs['confirm_password']:
+            raise serializers.ValidationError({'password': 'Password does\'t match!'})
+
+        if len(attrs['password']) < 6:
+            raise serializers.ValidationError({'password': 'Password is too short!'})
+
+        if User.objects.filter(email= attrs['email']).exists():
+            raise serializers.ValidationError({'email': 'This email already exits!'})
+        return attrs
 
     def save(self):
         username = self.validated_data['username']
@@ -27,13 +47,7 @@ class PatientRegister(serializers.ModelSerializer):
         last_name = self.validated_data['last_name']
         email = self.validated_data['email']
         password = self.validated_data['password']
-        confirm_password = self.validated_data['confirm_password']
 
-        if password != confirm_password:
-            raise serializers.ValidationError({'password': 'Password does\'t match!'})
-
-        if User.objects.filter(email= email).exists():
-            raise serializers.ValidationError({'email': 'This email already exits!'})
         user = User.objects.create_user(
             username= username,
             email= email,

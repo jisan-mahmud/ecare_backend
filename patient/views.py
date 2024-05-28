@@ -16,6 +16,7 @@ from rest_framework import status
 from django.contrib.auth import authenticate
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.utils import timezone
+from django.shortcuts import HttpResponse, redirect
 
 # header file for email confirmation
 from django.contrib.sites.shortcuts import get_current_site
@@ -42,10 +43,6 @@ class PatientViewset(viewsets.ModelViewSet):
         response_data = self.serializer_class(patient)
         return Response(response_data.data)
 
-
-
-
-
 class PatientRegisterAPIView(APIView):
     serializer_class = PatientRegister
     def post(self, request):
@@ -60,6 +57,7 @@ class PatientRegisterAPIView(APIView):
                 'domain': current_site.domain,
                 'uid':urlsafe_base64_encode(str(user.pk).encode()),
                 'token':default_token_generator.make_token(user),
+                'redirect_url': request.headers.get('redirect-url')
             }
             )
             to_email = user.email
@@ -71,10 +69,10 @@ class PatientRegisterAPIView(APIView):
             return Response(serializer.data)
         return Response({'errors': serializer.errors})
 
-@api_view(['GET'])
 def active(request, uid, token):
     id = urlsafe_base64_decode(uid).decode()
     user = User.objects.get(pk= id)
+    redirect_url = request.GET.get('redirect_url')
     if default_token_generator.check_token(user, token):
         user.is_active = True
         user.save()
@@ -85,9 +83,9 @@ def active(request, uid, token):
             'email': user.email,
             'token': token.key
         }
-        return Response(response, status= status.HTTP_200_OK)
+        return redirect(redirect_url)
     else:
-        return Response({'error': 'Try again. Email not activate!'}, status = status.HTTP_404_NOT_FOUND)
+        return HttpResponse('Invalid link')
 
 
 class UserLoginAPIView(APIView):
@@ -108,7 +106,7 @@ class UserLoginAPIView(APIView):
 
                 response = {
                     'success': True,
-                    'id': user.id,
+                    'user_id': user.id,
                     'username': user.username,
                     'token': token.key
                 }
@@ -119,7 +117,7 @@ class UserLoginAPIView(APIView):
                     'massage': 'user credentials invalid.'
                 }
                 return Response(response, status= status.HTTP_401_UNAUTHORIZED)
-        return Response({'error': serializer.errors}, status= status.HTTP_400_BAD_REQUEST)
+        return Response({'errors': serializer.errors}, status= status.HTTP_400_BAD_REQUEST)
 
 
 class LogoutAPIView(APIView):

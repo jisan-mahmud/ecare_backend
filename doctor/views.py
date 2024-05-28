@@ -47,6 +47,20 @@ class AvailableTimeViewset(viewsets.ModelViewSet):
     queryset = models.AvailableTime.objects.all()
     serializer_class = AvailableTimeSerializer
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        doctor_id = self.request.query_params.get('doctor_id')
+        if doctor_id:
+            queryset = queryset.filter(doctor= doctor_id)
+        return queryset
+
 class ReviewViewset(viewsets.ModelViewSet):
     queryset = models.Review.objects.all()
     serializer_class = ReviewSerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        doctor_id = self.request.query_params.get('doctor_id')
+        if doctor_id:
+            queryset = queryset.filter(doctor= doctor_id)
+        return queryset

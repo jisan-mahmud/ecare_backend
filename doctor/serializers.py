@@ -35,6 +35,7 @@ class AvailableTimeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ReviewSerializer(serializers.ModelSerializer):
+    reviewer = serializers.StringRelatedField()
     class Meta:
         model = Review
         fields = '__all__'

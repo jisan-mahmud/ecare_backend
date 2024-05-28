@@ -46,14 +46,14 @@ class Review(models.Model):
         ('⭐⭐⭐⭐', '⭐⭐⭐⭐'),
         ('⭐⭐⭐⭐⭐', '⭐⭐⭐⭐⭐')
     )
-    patient = models.ForeignKey(Patient, on_delete= models.CASCADE)
+    reviewer = models.ForeignKey(Patient, on_delete= models.CASCADE)
     doctor = models.ForeignKey(Doctor, on_delete= models.CASCADE)
     body = models.TextField()
     rating = models.CharField(choices= STAR_RATING, max_length= 7)
     create_at = models.DateTimeField(auto_now_add= True)
 
     class Meta:
-        unique_together = ('patient', 'doctor')
+        unique_together = ('reviewer', 'doctor')
 
     def __str__(self):
-        return f'Doctor: {self.doctor.user.first_name} review by {self.patient.user.first_name}'
+        return f'Doctor: {self.doctor.user.first_name} review by {self.reviewer.user.first_name}'
