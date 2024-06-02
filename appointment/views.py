@@ -1,21 +1,30 @@
-from rest_framework import viewsets
-from .serializers import AppointmentSerializer
+from rest_framework.views import APIView
+from .serializers import AppointmentSerializer, TakeAppointmentSerializer
 from .models import Appointment
+from patient.models import Patient
+from rest_framework.response import Response
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework import status
 
-class AppointmentViewset(viewsets.ModelViewSet):
-    # Specify the queryset and serializer class for the viewset
-    queryset = Appointment.objects.all()
-    serializer_class = AppointmentSerializer
+class AppointmentAPIView(APIView):
+    permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
-        # Get the initial queryset
-        queryset = super().get_queryset()
+    def get(self, request, formate= None):
+        patient = Patient.objects.get(user= request.user)
+        appointments = Appointment.objects.filter(patient= patient)
+        serialize_data = AppointmentSerializer(appointments, many= True)
+        return Response(serialize_data.data)
 
-        # Retrieve the 'patient_id' from the query parameters
-        patient_id = self.request.query_params.get('patient_id')
+    def post(self, request):
+        patient = Patient.objects.get(user= request.user)
+        serializer = TakeAppointmentSerializer(data= request.data, context= {'patient': patient})
 
-        # If 'patient_id' is provided in the query parameters, filter appointments by patient
-        if patient_id:
-            queryset = queryset.filter(patient__id=patient_id)
-
-        return queryset  # Return the filtered queryset
+        if serializer.is_valid():
+            instance = serializer.save(patient= patient)
+            instance.save()
+            response = {
+                'success': True,
+                'massage': 'Successfully taken a appointment!'
+            }
+            return Response(response, status= status.HTTP_200_OK)
+        return Response({'errors': serializer.errors}, status= status.HTTP_406_NOT_ACCEPTABLE)

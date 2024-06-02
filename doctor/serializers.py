@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from patient.models import Patient
+from patient.serializers import PatientSerializer
 from .models import (
     Doctor,
     Designation,
@@ -34,8 +36,10 @@ class AvailableTimeSerializer(serializers.ModelSerializer):
         model = AvailableTime
         fields = '__all__'
 
+
 class ReviewSerializer(serializers.ModelSerializer):
     reviewer = serializers.StringRelatedField()
+    doctor = serializers
     class Meta:
         model = Review
         fields = '__all__'
