@@ -8,11 +8,21 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['first_name', 'last_name', 'email']
 
 class PatientSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+    first_name = serializers.CharField(source= 'user.first_name')
+    last_name = serializers.CharField(source= 'user.last_name')
+    email = serializers.EmailField(source= 'user.email')
 
     class Meta:
         model = Patient
-        fields = '__all__'
+        fields = ['first_name', 'last_name', 'image', 'email', 'mobile_no']
+
+    def save(self):
+        first_name = self.validated_data['user'].get('first_name')
+        last_name = self.validated_data['user'].get('last_name')
+        email = self.validated_data['user'].get('email')
+        image = self.validated_data.get('image')
+        mobile_no = self.validated_data.get('mobile_no')
+        print(first_name, last_name, image, email, mobile_no)
 
 
 class PatientRegister(serializers.ModelSerializer):

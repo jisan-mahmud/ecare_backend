@@ -1,3 +1,4 @@
+from urllib import response
 from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -5,7 +6,8 @@ from .models import Patient
 from .serializers import (
     PatientSerializer,
     PatientRegister,
-    UserLoginSerializer
+    UserLoginSerializer,
+    UserSerializer
     )
 from django.contrib.auth.models import User
 from django.shortcuts import redirect
@@ -26,22 +28,24 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
 from rest_framework.decorators import action
 
-class PatientViewset(viewsets.ModelViewSet):
-    queryset = Patient.objects.all()
+class PatientViewset(APIView):
     serializer_class = PatientSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = Patient.objects.all()
 
-    def get_permissions(self):
-        if self.action == 'info':
-            permission_classes = [IsAuthenticated]
-        else:
-            permission_classes = [IsAdminUser]
-        return [permissions() for permissions in permission_classes]
+    def get(self, request, pk= None):
+        patient = self.queryset.get(user= request.user)
+        response = self.serializer_class(patient, many= False)
+        return Response(data= response.data)
+    
+    def put(self, request):
+        serializer = PatientSerializer(data= request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status= status.HTTP_200_OK)
+        return Response({"errors": serializer.errors})
+   
 
-    @action(detail= False, methods= ['get'], permission_classes= [IsAuthenticated])
-    def info(self, request, pk= None):
-        patient = Patient.objects.get(user= request.user)
-        response_data = self.serializer_class(patient)
-        return Response(response_data.data)
 
 class PatientRegisterAPIView(APIView):
     serializer_class = PatientRegister

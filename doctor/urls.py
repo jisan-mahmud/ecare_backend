@@ -13,7 +13,7 @@ router.register(r'list', DoctorViewset)
 router.register(r'designation', DesignationViewset)
 router.register(r'specialization', SpecializationViewset)
 router.register(r'availabletime', AvailableTimeViewset)
-router.register(r'review', ReviewViewset)
+router.register(r'review', ReviewViewset, basename='review')
 
 urlpatterns = [
     path('', include(router.urls))

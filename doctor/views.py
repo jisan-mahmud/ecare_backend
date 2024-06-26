@@ -1,4 +1,6 @@
 from rest_framework import viewsets
+from rest_framework.response import Response
+from rest_framework import status
 from . import models
 from .serializers import (
     DoctorSerializer,
@@ -13,7 +15,6 @@ from rest_framework.pagination import PageNumberPagination
 class CustomPagination(PageNumberPagination):
     page_size = 8
     page_query_param = 'page_size'
-
 
 class DoctorViewset(viewsets.ReadOnlyModelViewSet):
     queryset = models.Doctor.objects.all()
@@ -33,8 +34,6 @@ class DoctorViewset(viewsets.ReadOnlyModelViewSet):
                 ).distinct()
         return queryset
 
-
-
 class DesignationViewset(viewsets.ModelViewSet):
     queryset = models.Designation.objects.all()
     serializer_class = DesignationSerializer
@@ -53,3 +52,14 @@ class AvailableTimeViewset(viewsets.ModelViewSet):
         if doctor_id:
             queryset = queryset.filter(doctor= doctor_id)
         return queryset
+    
+
+class ReviewViewset(viewsets.ViewSet):
+
+    def list(self, request):
+        queryset = models.Review.objects.all()
+        doctor_id = request.query_params.get('doctor_id')
+        if(doctor_id):
+            queryset = queryset.filter(doctor= doctor_id)
+        review = ReviewSerializer(queryset, many= True)
+        return Response(review.data, status= status.HTTP_200_OK)
