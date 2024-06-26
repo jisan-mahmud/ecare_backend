@@ -16,14 +16,27 @@ class PatientSerializer(serializers.ModelSerializer):
         model = Patient
         fields = ['first_name', 'last_name', 'image', 'email', 'mobile_no']
 
-    def save(self):
+    def save(self, user):
         first_name = self.validated_data['user'].get('first_name')
         last_name = self.validated_data['user'].get('last_name')
         email = self.validated_data['user'].get('email')
         image = self.validated_data.get('image')
         mobile_no = self.validated_data.get('mobile_no')
-        print(first_name, last_name, image, email, mobile_no)
 
+        # find object
+        user_obj = user
+        patient = Patient.objects.get(user= user)
+
+        #update user info
+        user_obj.first_name = first_name
+        user_obj.last_name = last_name
+        user_obj.email = email
+        user.save()
+
+        # update patient info
+        patient.image = image
+        patient.mobile_no = mobile_no
+        patient.save()
 
 class PatientRegister(serializers.ModelSerializer):
     confirm_password = serializers.CharField()

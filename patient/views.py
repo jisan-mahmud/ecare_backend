@@ -41,7 +41,7 @@ class PatientViewset(APIView):
     def put(self, request):
         serializer = PatientSerializer(data= request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(user = request.user)
             return Response(serializer.data, status= status.HTTP_200_OK)
         return Response({"errors": serializer.errors})
    
