@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 
 class Patient(models.Model):
     user = models.OneToOneField(User, on_delete= models.CASCADE, related_name= 'Patient')
-    image = models.ImageField(upload_to= 'patient/image', blank= True)
+    image = models.ImageField(upload_to= 'patient/image', blank= True, default= 'patient/image/no-image.jpg')
     mobile_no = models.CharField(max_length= 12, blank= True)
 
     def __str__(self):

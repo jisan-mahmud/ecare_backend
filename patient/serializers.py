@@ -11,10 +11,14 @@ class PatientSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(source= 'user.first_name')
     last_name = serializers.CharField(source= 'user.last_name')
     email = serializers.EmailField(source= 'user.email')
-
+    image = serializers.SerializerMethodField('get_image')
     class Meta:
         model = Patient
         fields = ['first_name', 'last_name', 'image', 'email', 'mobile_no']
+
+    def get_image(self, obj):
+        request = self.context.get("request")
+        return request.build_absolute_uri(obj.image.url)
 
     def save(self, user):
         first_name = self.validated_data['user'].get('first_name')

@@ -1,3 +1,4 @@
+from multiprocessing import context
 from urllib import response
 from rest_framework import viewsets
 from rest_framework.views import APIView
@@ -35,7 +36,7 @@ class PatientViewset(APIView):
 
     def get(self, request, pk= None):
         patient = self.queryset.get(user= request.user)
-        response = self.serializer_class(patient, many= False)
+        response = self.serializer_class(patient, context= {"request": request}, many= False)
         return Response(data= response.data)
     
     def put(self, request):
@@ -43,7 +44,7 @@ class PatientViewset(APIView):
         if serializer.is_valid():
             serializer.save(user = request.user)
             return Response(serializer.data, status= status.HTTP_200_OK)
-        return Response({"errors": serializer.errors})
+        return Response({"errors": serializer.errors}, status= status.HTTP_304_NOT_MODIFIED)
    
 
 
