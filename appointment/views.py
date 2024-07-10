@@ -13,7 +13,7 @@ class AppointmentAPIView(APIView):
         patient = Patient.objects.get(user= request.user)
         appointments = Appointment.objects.filter(patient= patient)
         serialize_data = AppointmentSerializer(appointments, many= True)
-        return Response(serialize_data.data)
+        return Response(serialize_data.data, status= status.HTTP_200_OK)
 
     def post(self, request):
         patient = Patient.objects.get(user= request.user)

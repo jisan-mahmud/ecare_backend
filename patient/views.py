@@ -40,10 +40,14 @@ class PatientViewset(APIView):
         return Response(data= response.data)
     
     def put(self, request):
-        serializer = PatientSerializer(data= request.data)
+        serializer = PatientSerializer(data= request.data, context= {"request": request})
         if serializer.is_valid():
             serializer.save(user = request.user)
-            return Response(serializer.data, status= status.HTTP_200_OK)
+            response = {
+                'success': "True",
+                'massage': 'Update profile successfully.',
+            }
+            return Response(response, status= status.HTTP_200_OK)
         return Response({"errors": serializer.errors}, status= status.HTTP_304_NOT_MODIFIED)
    
 
