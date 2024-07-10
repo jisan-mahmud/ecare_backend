@@ -113,9 +113,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = 'static/'
+import os 
 
+STATIC_URL = 'static/'
 MEDIA_URL = 'media/'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
@@ -130,7 +132,7 @@ EMAIL_HOST_PASSWORD = 'bnio fsoe bhku geha'
 EMAIL_PORT = 587
 
 
-CORS_ALLOWED_ORIGINS = ['http://127.0.0.1:5500',]
+CORS_ALLOWED_ORIGINS = ['http://127.0.0.1:5501',]
 
 CORS_ALLOW_HEADERS = (
     'Content-Type',

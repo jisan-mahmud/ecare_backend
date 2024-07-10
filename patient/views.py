@@ -36,11 +36,11 @@ class PatientViewset(APIView):
 
     def get(self, request, pk= None):
         patient = self.queryset.get(user= request.user)
-        response = self.serializer_class(patient, context= {"request": request}, many= False)
+        response = self.serializer_class(patient, many= False)
         return Response(data= response.data)
     
     def put(self, request):
-        serializer = PatientSerializer(data= request.data, context= {"request": request})
+        serializer = PatientSerializer(data= request.data)
         if serializer.is_valid():
             serializer.save(user = request.user)
             response = {
